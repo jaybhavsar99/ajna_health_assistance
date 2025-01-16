@@ -26,18 +26,18 @@ Technical Implementation:
 
 Data Source:
 - Motion-Sense Dataset: This open-source dataset is used to classify human activities based on motion sensor data (gyroscope and accelerometer).
-  - Motion-Sense Dataset on Kaggle: https://www.kaggle.com/datasets/malekzadeh/motionsense-dataset
+- Motion-Sense Dataset on Kaggle: https://www.kaggle.com/datasets/malekzadeh/motionsense-dataset
 
 Activity Classification Model:
 - Model Type: Multi-class classifier built using the XGBoost algorithm.
 - Input Parameters:
-  - Gyro.y: Angle of inclination on the y-axis (from the gyroscope).
-  - Pitch.y: Altitude data (from the accelerometer).
-  - Rotation rate: Motion rate on the y-axis.
+- Gyro.y: Angle of inclination on the y-axis (from the gyroscope).
+- Pitch.y: Altitude data (from the accelerometer).
+- Rotation rate: Motion rate on the y-axis.
 
 AI Model and Feedback Generation (GenAI):
 - LangChain: Utilized to manage the model's input and output.
-  - Streaming Model Parameters: LangChain streams model parameters to monitor the performance and execution of the model.
+- Streaming Model Parameters: LangChain streams model parameters to monitor the performance and execution of the model.
 - Ollama Wrapper: Implements the Llama 2 model locally for generating feedback.
 
 UI and Backend:
