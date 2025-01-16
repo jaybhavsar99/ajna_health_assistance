@@ -9,45 +9,49 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.llms import Ollama
 
-# Load environment variables from .env file
 load_dotenv()
 
 # Set up logging
+# to be used for terminal level debugging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 # Set environment variables for Langchain
+# parameter api keys from langchain 
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_API_KEY"] = "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"
 
-# Initialize Streamlit UI
-st.title('Langchain Demo With LLAMA2 API')
+
+st.title('Health Assistace')
 
 # Input fields for user parameters
-age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
+# this parameter will be taken as input to the network for demo purpose it is user define
+age = st.number_input("Enter your age", min_value=5, max_value=100, step=1)
 gender = st.selectbox("Select your gender", ["Male", "Female", "Other"])
-weight = st.number_input("Enter your weight (kg)", min_value=1, step=1)
-temperature = st.number_input("Enter the surrounding temperature (°C)", min_value=-50.0, max_value=50.0, step=0.1)
-rotation_rate = st.number_input("Rotation angle(degree normalized)", min_value=-3.00, max_value=3.00, step=0.1)
-angley = st.number_input("(gyro angle degree normalized)", min_value=-3.00, max_value=3.00, step=0.1)
-pitch = st.number_input("(pitch angle degree normalized)", min_value=-3.00, max_value=3.00, step=0.1)
+weight = st.number_input("Enter your weight (kg)", min_value=10, step=1)
+temperature = st.number_input("Enter the surrounding temperature (°C)", min_value=-10.0, max_value=50.0, step=0.1)
+location = st.text_input("Enter Location city")
+rotation_rate = st.number_input("Rotation rate", min_value=-3.00, max_value=10.00, step=0.1)
+angley = st.number_input("(gyro angle y)", min_value=-3.00, max_value=10.00, step=0.1)
+pitch = st.number_input("(altitude pitch)", min_value=-3.00, max_value=10.00, step=0.1)
 
 # Define the prompt template
 prompt = ChatPromptTemplate.from_messages(
     [
         ("system", "You are a health assistant. You need to provide health feedback based on the user's activity, including information like age, gender, weight, and surrounding temperature. Ensure to offer feedback on whether the activity is safe or not and provide constructive warnings."),
-        ("user", "Age: {age}, Gender: {gender}, Weight: {weight}, Temperature: {temperature}, Activity: {question}")
+        ("user", "Age: {age}, Gender: {gender}, Weight: {weight}, Temperature: {temperature},Location: {location}, Activity: {question}")
     ]
 )
 
 # Action dictionary to map activity names to values
 action_dict = {'going down hill': 0, 'running': 1, 'siting': 2, 'standing': 3, 'climbing': 4}
 
-# Load the model
+# Staging classification model to avoid recall and re initializaton
 @st.cache_resource
 def load_model():
     logger.info("Loading XGBoost model...")
     model = xgb.XGBClassifier()  # Or use XGBRegressor depending on your task
+    ## model version to be used v2.1
     model.load_model('xgboost_model_v2.1.json')
     logger.info("Model loaded successfully.")
     return model
@@ -58,7 +62,7 @@ loaded_model = load_model()
 # Define the operation triggered by button click
 def process_activity():
     # Log input values
-    logger.info(f"Processing with inputs: Age={age}, Gender={gender}, Weight={weight}, Temperature={temperature}, RotationRate={rotation_rate}, Angley={angley}, Pitch={pitch}")
+    logger.info(f"Processing with inputs: Age={age}, Gender={gender}, Weight={weight},Location={location}, Temperature={temperature}, RotationRate={rotation_rate}, Angley={angley}, Pitch={pitch}")
     
     # Prepare data for prediction
     data_dict = {
@@ -92,6 +96,7 @@ def process_activity():
         "gender": gender,
         "weight": weight,
         "temperature": temperature,
+        "location": location,
         "question": action_name[0]
     })
     
